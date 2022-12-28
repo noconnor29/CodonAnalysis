@@ -6,7 +6,7 @@ Initially in python with potential for a version in a compiled language.
 ## Inputs 
 * path to CSV file with DNA sequence(s)
 * amino acid sequence of end tag sequence (required)
-    * default: EQKLISEEDL or Glu-Gln-Lys-Leu-Ile-Ser-Glu-Glu-Asp-Leu <sup>[3]</sup>
+    * default: EQKLISEEDL <sup>[3]</sup>
 * base sequence of start tag sequence (optional)
 
 ## Data Structures
