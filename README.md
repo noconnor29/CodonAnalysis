@@ -14,7 +14,7 @@ Initially in python with potential for a version in a compiled language.
 * Running list of 30 last read bases (to identify end tag)
 * Running list of amino acids
 * Mapping of codons to amino acids - [dictionary](https://www.geeksforgeeks.org/dna-protein-python-3/)
-    * science fact: one or more codons map to a each amino acid
+    * Science Fact<sup>TM</sup>: one or more codons map to a each amino acid
     * ```python
         codon2amino{
             'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
