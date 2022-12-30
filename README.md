@@ -4,14 +4,15 @@ Tool to analyze DNA sequences to identify relevant amino acids.
 Initially in python with potential for a version in a compiled language. 
 
 ## Inputs 
-* path to CSV file with DNA sequence(s)
-* amino acid sequence of end tag sequence (required)
+* path to directory of files containing DNA sequences
+* prompt for sequencing direction (forward/coding vs reverse/complement)
+* base sequence of start tag/codon
+    * default: ATG
+* amino acid sequence of stop tag/codon
     * default: EQKLISEEDL <sup>[3]</sup>
-* base sequence of start tag sequence (optional)
 
 ## Data Structures
 * Variables for end and start tag
-* Running list of 30 last read bases (to identify end tag)
 * Running list of amino acids
 * Mapping of codons to amino acids - [dictionary](https://www.geeksforgeeks.org/dna-protein-python-3/)
     * Science Fact<sup>TM</sup>: one or more codons map to a each amino acid
@@ -37,14 +38,16 @@ Initially in python with potential for a version in a compiled language.
         ```
 
 ## Procedure
-Given a DNA sequence (~1k bases), an end tag, and an optional start tag...
-1. Read DNA sequence base-wise downstream (5' to 3') until end tag sequence is identified
-2. Move reading frame upsteam from end tag in 3-base (codon) increments
-3. Within the frame, bases are read downstream to identify codon and/or amino acid (AA). Append codon/AA to beginning of list of codons/AA.
-    * areas of low sequence fidelity ("uncalled bases") will require error handling
-4. Repeat Steps 2 & 3 until...
-    - start tag (if supplied) is reached (i.e. indicies [0-2] = start tag), or
-    - beginning of sequence is reached
+Given a DNA sequence (~1k bases), a start tag/codon, and an stop tag/codon...
+1. Read DNA sequence base-wise in the specified direction 
+2. Identify location of start tag
+3. Beginning with start tag, translate DNA sequence into amino acids.
+4. Continue translation until stop tag/stop codon reached
+5. Report following data points:
+    * Original sequence
+    * DNA sequence from start to stop
+    * AA sequence from start to stop
+    * In-frame? yes/no
   
 ## Resources
 1. [DNA to Protein in Python 3](https://www.geeksforgeeks.org/dna-protein-python-3/)
