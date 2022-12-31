@@ -5,7 +5,8 @@ Initially in python with potential for a version in a compiled language.
 
 ## Inputs 
 * path to directory of files containing DNA sequences
-* prompt for sequencing direction (forward/coding vs reverse/complement)
+* prompt for sequence direction (forward/coding vs reverse/complement)
+    * in general, given non-coding sequence. Will need to reverse the recieved direction (from 5'-3'to 3'-5') then generate complementary base sequence (A<->T, C<->G) 
 * base sequence of start tag/codon
     * default: ATG
 * amino acid sequence of stop tag/codon
@@ -17,7 +18,7 @@ Initially in python with potential for a version in a compiled language.
 * Mapping of codons to amino acids - [dictionary](https://www.geeksforgeeks.org/dna-protein-python-3/)
     * Science Fact<sup>TM</sup>: one or more codons map to a each amino acid
     * ```python
-        codon2amino{
+        dna2amino{
             'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
             'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
             'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
