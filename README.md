@@ -6,7 +6,7 @@ Initially in python with potential for a version in a compiled language.
 ## Inputs 
 * path to directory of files containing DNA sequences
 * prompt for sequence direction (forward/coding vs reverse/complement)
-    * in general, given non-coding sequence. Will need to reverse the recieved direction (from 5'-3'to 3'-5') then generate complementary base sequence (A<->T, C<->G) 
+    * in general, given reverse, non-coding sequence. Need to reverse the recieved direction (from 5'-3'to 3'-5') then generate complementary base sequence
 * base sequence of start tag/codon
     * default: ATG
 * amino acid sequence of stop tag/codon
@@ -42,7 +42,7 @@ Initially in python with potential for a version in a compiled language.
 Given a DNA sequence (~1k bases), a start tag/codon, and an stop tag/codon...
 1. Read DNA sequence base-wise in the specified direction 
 2. Identify location of start tag
-3. Beginning with start tag, translate DNA sequence into amino acids.
+3. Translate into amino acids backwards from end tag
 4. Continue translation until stop tag/stop codon reached
 5. Report following data points:
     * Original sequence
