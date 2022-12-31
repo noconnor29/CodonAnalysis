@@ -23,10 +23,10 @@ def lookupAA(codon):
     return aminoAcid
 
 def translate(dnaSequence, index=0):
-    seqCodonList = [dnaSequence[i:i+3] for i in range(index, len(dnaSequence), 3)]
+    seqCodonList = [dnaSequence[i:i+3] for i in range((len(dnaSequence)-3), index-1, -3)]
     aaList = []
     for codon in seqCodonList:
-        aaList.append(lookupAA(''.join(codon)))
+        aaList.insert(0, lookupAA(''.join(codon)))
     return aaList
 
 def reverse(input):
@@ -49,10 +49,10 @@ def transform(sequence):
         return sequence
 
 def inFrame(sequence):
-    if len(sequence) % 3:
+    if len(sequence) % 3 == 0:
         return 'Sequence is in frame.'
     else:
-        return 'Sequence is not in frame. '
+        return 'Sequence is not in frame.'
 
 def aa2dna(string):
     stringDNAlist = []
@@ -105,30 +105,26 @@ seqAAlist = translate(transformedDNA)
 ## Find index of start codon
 startTagIndex = findFirst(''.join(seqDNAlist), startTagDNA) # DNA
 #startTagIndex = findFirst(''.join(seqAAlist), startTag) # AA
-print('Start Tag Index: ' + str(startTagIndex))
+#print('Start Tag Index: ' + str(startTagIndex))
 
 ## Create open reading frame, ORF
 stopTagIndex = findFirst(seqDNA, stopTagDNA)
-print('Stop Tag Index: ' + str(stopTagIndex))
+#print('Stop Tag Index: ' + str(stopTagIndex))
 orf = seqDNA[startTagIndex:(stopTagIndex+len(stopTagDNA))]
 
 ##  Create encoded amino acid sequence
 aminos = ''.join(translate(orf, startTagIndex))
-
-#seqAAstr = ''.join(seqAAlist)
-#stopTagIndex = findFirst(seqAAstr, stopTag)
-#print('Stop Tag Index: ' + str(stopTagIndex))
-#encodedAA = seqAAstr[startTagIndex:(stopTagIndex+len(stopTag))]
-
 
 ## Report Output
 print('\nFinal Results')
 print('Original Sequence: ' + seqDNA)
 print()
 print('DNA ORF: ' + orf)
+print('Stop Tag in frame?: ' + inFrame(orf))
 print()
 print('AA Seq: ' + aminos)
 
-# To do: 
+### To do: 
 # reconcile use of DNA vs AA tags
-# revisit reading codons backwards from stop tags
+# ingest files and prompt for user input
+# create output file
