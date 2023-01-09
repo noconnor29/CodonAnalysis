@@ -15,7 +15,7 @@ Initially in python with potential for a version in a compiled language.
 ## Data Structures
 * Variables for end and start tag
 * Running list of amino acids
-* Mapping of codons to amino acids - [dictionary](https://www.geeksforgeeks.org/dna-protein-python-3/)
+* Mapping of codons to amino acids
     * Science Fact<sup>TM</sup>: one or more codons map to a each amino acid
 
 ## Procedure
