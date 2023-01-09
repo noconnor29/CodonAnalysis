@@ -63,6 +63,27 @@ def aa2dna(string):
         stringDNAlist.append(key_list[val])
     return ''.join(stringDNAlist)
 
+def createOutFile(path, outfile): #take name from input file selection
+    fields = ['Sample_Name', 'Chromat_id', 'Read_id', 
+              'Version', 'Length', 'Original Seq', 
+              'Transformed Seq', 'ORF', 'In Frame', 
+              'Amino Seq']
+    with open(path + '/' + outfile + '.csv', 'w') as csvfile:
+        filewriter = csv.writer(csvfile)
+        filewriter.writerow(fields)
+
+def processFiles(files):
+    for file in files:
+        with file.open('r') as f:
+            data = f.readlines()
+            # extract attributes from 1st line
+            values = re.findall(r'(?<=\=)\w+', data[0])
+            # process sequence from 2nd line, append to values
+
+            # write values to file
+            with open('/home/nick/Downloads/test.csv', 'a') as f:
+                csv.writer(f).writerow(values)
+
 ### Variables
 rawInput = 'atgataggcatccatcggcttgctatgcttcgcgaccgtccctatgatcgcggcgccgaccaaaactgcgctcgtcaacgtatgcgtgccatgatgatgcaacatattaacttcagtacttggcccaactccatagcgagccattatgacattagtcatgtcccaagggctttccttgcaggtattgtatcttggacttcgcaggctaggagacatataagtcgcattcgtgtcgcggaaacaaaagatattgattgcttgatggctacgttcggctgtgacagggtcacaacttcaaccaaggcaattagcgccggactgcatttactcggatttcgggacaaaattcccgcagtgcgcagtcccttagtaccgccggataagcacggccgctcctttagctttcatgcttcggttgtactacctcaacataaactcccgtcccgcgtaggagtcgcaatcgtccgcatcgacccagcaccctgtgacgtggcaaacccgagtcgtttagaaaacgaagcaagtaatgagaagcagaactggattgcgtcatgcgcaggggcggacctttttcaagtgtcacaagcgacctgccttggtgcgtgtgcttccaataggttaatttcaggaagcactctgtattggattaggaggagttggatgaccagagacccgggtaatccattaaccctgagtgttgcaggattacgggttctggccacatatctagagaaaggggttttggagccaccaaaaatgagacgacatggtacgattgaggcaggctttttaaatgtaatgaaccccaaacaacagcgggtgaaacgatacacttcaagggctattttgcacgtgggatgttataaatcaggcctgcagggtttcgatagagtgtgtaccaacgccttccccccggccaagatcgtttccagggtattcgcagaacaaaaactcatctcagaagaggatctgtga'
 seqDNA = rawInput.upper()
@@ -127,4 +148,3 @@ print('AA Seq: ' + aminos)
 ### To do: 
 # reconcile use of DNA vs AA tags
 # ingest files and prompt for user input
-# create output file
