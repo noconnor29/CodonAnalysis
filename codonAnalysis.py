@@ -1,14 +1,8 @@
-import csv
+import sys, re, csv, os.path
 import tkinter as tk       # sudo apt install python3-tk
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askdirectory
+from pathlib import Path
 
-### Import base seq from file
-tk.Tk().withdraw()      # part of the import if not using other tkinter f(x)
-
-#filename = askopenfilename()
-#inputfile ="\path\to\DNA_sequence_placeholder.csv" # use for testing
-#file = open(filename, "r")
-#seq = file.read()
 
 ### Functions
 def findFirst(sequence, target, startIndex=0):
@@ -63,31 +57,58 @@ def aa2dna(string):
         stringDNAlist.append(key_list[val])
     return ''.join(stringDNAlist)
 
-def createOutFile(path, outfile): #take name from input file selection
+def createOutFile(path):
     fields = ['Sample_Name', 'Chromat_id', 'Read_id', 
               'Version', 'Length', 'Original Seq', 
               'Transformed Seq', 'ORF', 'In Frame', 
               'Amino Seq']
-    with open(path + '/' + outfile + '.csv', 'w') as csvfile:
+    global outfile
+    outfile = (path + '/results_' + os.path.basename(path) + '.csv')
+    with open(outfile, 'w') as csvfile:
         filewriter = csv.writer(csvfile)
         filewriter.writerow(fields)
 
-def processFiles(files):
-    for file in files:
+def processFiles(path):
+    source_files = Path(path).glob('*.seq')
+    for file in source_files:
         with file.open('r') as f:
             data = f.readlines()
             # extract attributes from 1st line
             values = re.findall(r'(?<=\=)\w+', data[0])
             # process sequence from 2nd line, append to values
-
+            values.extend(analyze(testInput))
+            #values.extend(analyze(data[1])) # actual file content
             # write values to file
-            with open('/home/nick/Downloads/test.csv', 'a') as f:
+            with open(outfile, 'a') as f:
                 csv.writer(f).writerow(values)
 
+def analyze(sequence: str):
+    ## Transform input into 5'-3' coding strand
+    seqDNA = sequence.upper()
+    seqDNAlist = list(sequence.upper())
+    transformedDNA = transform(seqDNAlist)
+    seqAAlist = translate(transformedDNA)
+
+    ## Find index of start codon
+    startTagIndex = findFirst(''.join(seqDNAlist), startTagDNA) # DNA
+    #startTagIndex = findFirst(''.join(seqAAlist), startTag) # AA
+    #print('Start Tag Index: ' + str(startTagIndex))
+
+    ## Create open reading frame, ORF
+    stopTagIndex = findFirst(seqDNA, stopTagDNA) # encounter error here if stop tag not found
+    # need desired workflow. If stoptag not found, read until end or error out?
+    #print('Stop Tag Index: ' + str(stopTagIndex))
+    orf = seqDNA[startTagIndex:(stopTagIndex+len(stopTagDNA))]
+
+    ##  Create encoded amino acid sequence
+    aminos = ''.join(translate(orf, startTagIndex))
+
+    ## Return results
+    return [startTagIndex, stopTagIndex, orf, aminos]
+
+
 ### Variables
-rawInput = 'atgataggcatccatcggcttgctatgcttcgcgaccgtccctatgatcgcggcgccgaccaaaactgcgctcgtcaacgtatgcgtgccatgatgatgcaacatattaacttcagtacttggcccaactccatagcgagccattatgacattagtcatgtcccaagggctttccttgcaggtattgtatcttggacttcgcaggctaggagacatataagtcgcattcgtgtcgcggaaacaaaagatattgattgcttgatggctacgttcggctgtgacagggtcacaacttcaaccaaggcaattagcgccggactgcatttactcggatttcgggacaaaattcccgcagtgcgcagtcccttagtaccgccggataagcacggccgctcctttagctttcatgcttcggttgtactacctcaacataaactcccgtcccgcgtaggagtcgcaatcgtccgcatcgacccagcaccctgtgacgtggcaaacccgagtcgtttagaaaacgaagcaagtaatgagaagcagaactggattgcgtcatgcgcaggggcggacctttttcaagtgtcacaagcgacctgccttggtgcgtgtgcttccaataggttaatttcaggaagcactctgtattggattaggaggagttggatgaccagagacccgggtaatccattaaccctgagtgttgcaggattacgggttctggccacatatctagagaaaggggttttggagccaccaaaaatgagacgacatggtacgattgaggcaggctttttaaatgtaatgaaccccaaacaacagcgggtgaaacgatacacttcaagggctattttgcacgtgggatgttataaatcaggcctgcagggtttcgatagagtgtgtaccaacgccttccccccggccaagatcgtttccagggtattcgcagaacaaaaactcatctcagaagaggatctgtga'
-seqDNA = rawInput.upper()
-seqDNAlist = list(seqDNA)
+testInput = 'atgataggcatccatcggcttgctatgcttcgcgaccgtccctatgatcgcggcgccgaccaaaactgcgctcgtcaacgtatgcgtgccatgatgatgcaacatattaacttcagtacttggcccaactccatagcgagccattatgacattagtcatgtcccaagggctttccttgcaggtattgtatcttggacttcgcaggctaggagacatataagtcgcattcgtgtcgcggaaacaaaagatattgattgcttgatggctacgttcggctgtgacagggtcacaacttcaaccaaggcaattagcgccggactgcatttactcggatttcgggacaaaattcccgcagtgcgcagtcccttagtaccgccggataagcacggccgctcctttagctttcatgcttcggttgtactacctcaacataaactcccgtcccgcgtaggagtcgcaatcgtccgcatcgacccagcaccctgtgacgtggcaaacccgagtcgtttagaaaacgaagcaagtaatgagaagcagaactggattgcgtcatgcgcaggggcggacctttttcaagtgtcacaagcgacctgccttggtgcgtgtgcttccaataggttaatttcaggaagcactctgtattggattaggaggagttggatgaccagagacccgggtaatccattaaccctgagtgttgcaggattacgggttctggccacatatctagagaaaggggttttggagccaccaaaaatgagacgacatggtacgattgaggcaggctttttaaatgtaatgaaccccaaacaacagcgggtgaaacgatacacttcaagggctattttgcacgtgggatgttataaatcaggcctgcagggtttcgatagagtgtgtaccaacgccttccccccggccaagatcgtttccagggtattcgcagaacaaaaactcatctcagaagaggatctgtga'
 dna2amino = {
     'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
     'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
@@ -118,25 +139,14 @@ stopTagDNA = 'GAACAAAAACTCATCTCAGAAGAGGATCTG'
 isForward = True  # from prompt
 isCoding = True # from prompt
 
+
 ### Process
-## Transform input into 5'-3' coding strand
-transformedDNA = transform(seqDNAlist)
-seqAAlist = translate(transformedDNA)
-
-## Find index of start codon
-startTagIndex = findFirst(''.join(seqDNAlist), startTagDNA) # DNA
-#startTagIndex = findFirst(''.join(seqAAlist), startTag) # AA
-#print('Start Tag Index: ' + str(startTagIndex))
-
-## Create open reading frame, ORF
-stopTagIndex = findFirst(seqDNA, stopTagDNA)
-#print('Stop Tag Index: ' + str(stopTagIndex))
-orf = seqDNA[startTagIndex:(stopTagIndex+len(stopTagDNA))]
-
-##  Create encoded amino acid sequence
-aminos = ''.join(translate(orf, startTagIndex))
+sourceLocation = askdirectory(title="Select Folder with Sequence Files")
+createOutFile(sourceLocation)
+processFiles(sourceLocation)
 
 ## Report Output
+'''
 print('\nFinal Results')
 print('Original Sequence: ' + seqDNA)
 print()
@@ -144,7 +154,12 @@ print('DNA ORF: ' + orf)
 print('Stop Tag in frame?: ' + inFrame(orf))
 print()
 print('AA Seq: ' + aminos)
+'''
 
-### To do: 
-# reconcile use of DNA vs AA tags
-# ingest files and prompt for user input
+'''
+To Do:
+- Develop error handling in stopTagIndex if not found
+- finalize main function
+- make UX improvements
+- replace tk with builtin? something in os?
+'''
