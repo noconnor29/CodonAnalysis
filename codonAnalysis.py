@@ -31,7 +31,7 @@ def complement(input):
     for base in input:
         inputComplement.append(baseComplement.get(base))
     return inputComplement
-       
+
 def transform(sequence):
     if isForward is False and isCoding is False: # most common case
         return complement(reverse(sequence))
@@ -159,6 +159,7 @@ print('AA Seq: ' + aminos)
 '''
 To Do:
 - Develop error handling in stopTagIndex if not found
+    - error due to "uncalled base" i.e. unknown/low fidelity
 - finalize main function
 - make UX improvements
 - replace tk with builtin? something in os?
