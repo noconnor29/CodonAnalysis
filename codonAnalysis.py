@@ -13,7 +13,7 @@ def findFirst(sequence, target, startIndex=0):
         return "\'" + target + "\' not found in sequence."
 
 def lookupAA(codon):
-    aminoAcid = dna2amino.get(codon, 'No AA match')
+    aminoAcid = dna2amino.get(codon, 'Z') # Z not assoc. w/ AA
     return aminoAcid
 
 def translate(dnaSequence, index=0):
@@ -76,8 +76,8 @@ def processFiles(path):
             # extract attributes from 1st line
             values = re.findall(r'(?<=\=)\w+', data[0])
             # process sequence from 2nd line, append to values
-            values.extend(analyze(testInput))
-            #values.extend(analyze(data[1])) # actual file content
+            #values.extend(analyze(testInput))
+            values.extend(analyze(data[1])) # actual file content
             # write values to file
             with open(outfile, 'a') as f:
                 csv.writer(f).writerow(values)
