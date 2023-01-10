@@ -12,7 +12,7 @@ def findFirst(sequence, target, startIndex=0):
     else:
         return "\'" + target + "\' not found in sequence."
 
-def lookupAA(codon):
+def lookupAA(codon: str):
     aminoAcid = dna2amino.get(codon, 'Z') # Z not assoc. w/ AA
     return aminoAcid
 
@@ -27,6 +27,7 @@ def reverse(input):
     return list(reversed(input))
 
 def complement(input):
+    # need error handling for N/uncalled bases
     inputComplement = []
     for base in input:
         inputComplement.append(baseComplement.get(base))
@@ -43,7 +44,9 @@ def transform(sequence):
         return sequence
 
 def inFrame(sequence):
-    if len(sequence) % 3 == 0:
+    if 'not found' in sequence:
+        return 'Error: End tag/stop codon not found in sequence.'
+    elif len(sequence) % 3 == 0:
         return 'Sequence is in frame.'
     else:
         return 'Sequence is not in frame.'
@@ -60,7 +63,7 @@ def aa2dna(string):
 def createOutFile(path):
     fields = ['Sample_Name', 'Chromat_id', 'Read_id', 
               'Version', 'Length', 'Original Seq', 
-              'Transformed Seq', 'ORF', 'In Frame', 
+              'Transformed Seq', 'ORF', 'ORF Base Count' 'In Frame', 
               'Amino Seq']
     global outfile
     outfile = (path + '/results_' + os.path.basename(path) + '.csv')
@@ -77,6 +80,7 @@ def processFiles(path):
             values = re.findall(r'(?<=\=)\w+', data[0])
             # process sequence from 2nd line, append to values
             #values.extend(analyze(testInput))
+            #print((analyze(data[1])))
             values.extend(analyze(data[1])) # actual file content
             # write values to file
             with open(outfile, 'a') as f:
@@ -87,25 +91,26 @@ def analyze(sequence: str):
     seqDNA = sequence.upper()
     seqDNAlist = list(sequence.upper())
     transformedDNA = transform(seqDNAlist)
-    seqAAlist = translate(transformedDNA)
+    #seqAAlist = translate(transformedDNA)
 
     ## Find index of start codon
-    startTagIndex = findFirst(''.join(seqDNAlist), startTagDNA) # DNA
+    startTagIndex = findFirst(''.join(transformedDNA), startTagDNA) # DNA
     #startTagIndex = findFirst(''.join(seqAAlist), startTag) # AA
-    #print('Start Tag Index: ' + str(startTagIndex))
 
     ## Create open reading frame, ORF
-    stopTagIndex = findFirst(seqDNA, stopTagDNA) # encounter error here if stop tag not found
-    # need desired workflow. If stoptag not found, read until end or error out?
-    #print('Stop Tag Index: ' + str(stopTagIndex))
-    orf = seqDNA[startTagIndex:(stopTagIndex+len(stopTagDNA))]
-
+    stopTagIndex = findFirst(''.join(transformedDNA), stopTagDNA)
+    if type(stopTagIndex) == int:
+        orf = ''.join(transformedDNA)[startTagIndex:(stopTagIndex+len(stopTagDNA))]
+    else:
+        orf = stopTagIndex
+    
     ##  Create encoded amino acid sequence
-    aminos = ''.join(translate(orf, startTagIndex))
-
-    ## Return results
-    return [startTagIndex, stopTagIndex, orf, aminos]
-
+    if 'not found' in orf:
+        aminos = 'Error: End tag/stop codon not found in sequence.'
+    else:
+        aminos = ''.join(translate(orf, startTagIndex))
+    
+    return [seqDNA, ''.join(transformedDNA), orf, len(orf), inFrame(orf), aminos]
 
 ### Variables
 testInput = 'atgataggcatccatcggcttgctatgcttcgcgaccgtccctatgatcgcggcgccgaccaaaactgcgctcgtcaacgtatgcgtgccatgatgatgcaacatattaacttcagtacttggcccaactccatagcgagccattatgacattagtcatgtcccaagggctttccttgcaggtattgtatcttggacttcgcaggctaggagacatataagtcgcattcgtgtcgcggaaacaaaagatattgattgcttgatggctacgttcggctgtgacagggtcacaacttcaaccaaggcaattagcgccggactgcatttactcggatttcgggacaaaattcccgcagtgcgcagtcccttagtaccgccggataagcacggccgctcctttagctttcatgcttcggttgtactacctcaacataaactcccgtcccgcgtaggagtcgcaatcgtccgcatcgacccagcaccctgtgacgtggcaaacccgagtcgtttagaaaacgaagcaagtaatgagaagcagaactggattgcgtcatgcgcaggggcggacctttttcaagtgtcacaagcgacctgccttggtgcgtgtgcttccaataggttaatttcaggaagcactctgtattggattaggaggagttggatgaccagagacccgggtaatccattaaccctgagtgttgcaggattacgggttctggccacatatctagagaaaggggttttggagccaccaaaaatgagacgacatggtacgattgaggcaggctttttaaatgtaatgaaccccaaacaacagcgggtgaaacgatacacttcaagggctattttgcacgtgggatgttataaatcaggcctgcagggtttcgatagagtgtgtaccaacgccttccccccggccaagatcgtttccagggtattcgcagaacaaaaactcatctcagaagaggatctgtga'
@@ -128,38 +133,28 @@ dna2amino = {
     'TGC':'C', 'TGT':'C', 'TGA':'_', 'TGG':'W',
 }
 baseComplement = {
-    'A':'T', 'C':'G', 'G':'C', 'T':'A'
+    'A':'T', 'C':'G', 'G':'C', 'T':'A', 'N':'N'
 }
-startTag = 'M' # DNA bp=ATG / AA=M
+startTagAA = 'M' # DNA bp=ATG / AA=M
 startTagDNA = 'ATG'
 #startTag = input("Enter custom start tag:") # override default
-stopTag = 'EQKLISEEDL'
+stopTagAA = 'EQKLISEEDL'
 stopTagDNA = 'GAACAAAAGCTTATTTCTGAAGAGGACTTG'
 #stopTag = input("Enter custom end tag:") # override default
-isForward = True  # from prompt
-isCoding = True # from prompt
+isForward = False  # from prompt
+isCoding = False # from prompt
 
 
 ### Process
-sourceLocation = askdirectory(title="Select Folder with Sequence Files")
+sourceLocation = askdirectory(title="Select Folder with Sequence Files", initialdir="/home/nick/projects/CodonAnalysis/samples")
 createOutFile(sourceLocation)
 processFiles(sourceLocation)
 
-## Report Output
-'''
-print('\nFinal Results')
-print('Original Sequence: ' + seqDNA)
-print()
-print('DNA ORF: ' + orf)
-print('Stop Tag in frame?: ' + inFrame(orf))
-print()
-print('AA Seq: ' + aminos)
-'''
-
 '''
 To Do:
-- Develop error handling in stopTagIndex if not found
-    - error due to "uncalled base" i.e. unknown/low fidelity
+- test to ensure complement/reverse work
+- should also sort files or output rows alpha
+- should original name be preserved in spreadsheet
 - finalize main function
 - make UX improvements
 - replace tk with builtin? something in os?
