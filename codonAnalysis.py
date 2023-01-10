@@ -134,7 +134,7 @@ startTag = 'M' # DNA bp=ATG / AA=M
 startTagDNA = 'ATG'
 #startTag = input("Enter custom start tag:") # override default
 stopTag = 'EQKLISEEDL'
-stopTagDNA = 'GAACAAAAACTCATCTCAGAAGAGGATCTG'
+stopTagDNA = 'GAACAAAAGCTTATTTCTGAAGAGGACTTG'
 #stopTag = input("Enter custom end tag:") # override default
 isForward = True  # from prompt
 isCoding = True # from prompt
