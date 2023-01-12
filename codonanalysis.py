@@ -7,7 +7,7 @@ def main():
     sourceLocation = (input('Enter path to .seq files: ').replace("'",""))
     print(sourceLocation)
     menu()
-    global isCoding 
+    global isCoding
     isCoding = getOrientation()
     global startSeqDNA
     startSeqDNA = getStart()
@@ -22,7 +22,7 @@ def menu():
     print('    2 -- Non-Coding/Antisense\n')
     print('All strands in a batch are processed with same orientation.\n')
 
-def getOrientation():    
+def getOrientation():
     while True:
         selection = input('Please select the number representing the orientation: ')
         if selection not in ('1', '2'):
@@ -36,18 +36,18 @@ def getOrientation():
             return False
 
 def getStart():
-    tag = input("Enter Neucleotides of Start Sequence. Press [Enter] for 'ATG': ")
+    tag = input("Enter Nucleotides of Start Sequence. Press [Enter] for 'ATG': ")
     if tag == '':
         return 'ATG'
     else:
         return str(tag)
 
 def getTag():
-    tag = input('Enter Neucleotides of Tag. Press [Enter] for Myc-tag: ')
+    tag = input('Enter Nucleotides of Tag. Press [Enter] for Myc-tag: ')
     if tag == '':
         return 'GAACAAAAGCTTATTTCTGAAGAGGACTTG'
     else:
-        return str(tag) 
+        return str(tag)
 
 def findFirst(sequence, target, startIndex=0):
     position = sequence.find(target, startIndex)
@@ -100,9 +100,9 @@ def aa2dna(string):
     return ''.join(stringDNAlist)
 
 def createOutFile(path):
-    fields = ['Source File', 'Sample_Name', 'Chromat_id', 'Read_id', 
-              'Version', 'Length', 'Original Seq', 
-              'Transformed Seq', 'ORF', 'ORF Base Count', 'In Frame', 
+    fields = ['Source File', 'Sample_Name', 'Chromat_id', 'Read_id',
+              'Version', 'Length', 'Original Seq',
+              'Transformed Seq', 'ORF', 'ORF Base Count', 'In Frame',
               'Amino Seq']
     global outfile
     outfile = (path + '/results_' + os.path.basename(path) + '.csv')
@@ -152,7 +152,7 @@ dna2amino = {
     'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
     'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
     'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
-    'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',                 
+    'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
     'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
     'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
     'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
