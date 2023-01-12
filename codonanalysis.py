@@ -124,7 +124,7 @@ def processFiles(path):
             """write values to file"""
             with open(outfile, 'a') as f:
                 csv.writer(f).writerow(values)
-    print('\Results: ' + sourceLocation + os.sep + outfile)
+    print('\nResults: ' + sourceLocation + os.sep + outfile)
 
 def analyze(sequence: str):
     seqDNA = sequence.upper()
