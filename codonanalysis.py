@@ -1,5 +1,7 @@
 import sys, re, csv, os.path
 from pathlib import Path
+# pip install python-dotenv
+from dotenv import load_dotenv
 
 """Functions"""
 def main():
