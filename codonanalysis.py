@@ -2,12 +2,12 @@ import sys, re, csv, os.path
 from pathlib import Path
 # pip install python-dotenv
 from dotenv import load_dotenv
+load_dotenv()
 
 """Functions"""
 def main():
     global sourceLocation
     sourceLocation = (input('Enter path to .seq files: ').replace("'",""))
-    print(sourceLocation)
     menu()
     global isCoding
     isCoding = getOrientation()
@@ -38,9 +38,9 @@ def getOrientation():
             return False
 
 def getStart():
-    tag = input("Enter Nucleotides of Start Sequence. Press [Enter] for 'ATG': ")
+    tag = input("Enter Nucleotides of Start Sequence. Press [Enter] for '" + START_TAG +"': ")
     if tag == '':
-        return 'ATG'
+        return str(START_TAG)
     else:
         return str(tag)
 
@@ -51,12 +51,19 @@ def getTag():
     else:
         return str(tag)
 
-def findFirst(sequence, target, startIndex=0):
-    position = sequence.find(target, startIndex)
-    if(position>-1):
-        return int(position)
-    else:
-        return "\'" + target + "\' not found in sequence."
+def findFirst(sequence, target, forward=True, index=0):
+    if forward == True:
+        position = sequence.find(target, index)
+        if (position != -1):
+            return int(position)
+        else:
+            return "\'" + target + "\' not found in sequence."
+    elif forward == False:
+        rposition = sequence.rfind(target, 0, index) #search from beginning to tag
+        if (rposition != -1):
+            return int(rposition)
+        else:
+            return "\'" + target + "\' not found in sequence."
 
 def lookupAA(codon: str):
     aminoAcid = dna2amino.get(codon, 'Z')
@@ -132,13 +139,13 @@ def analyze(sequence: str):
     seqDNA = sequence.upper()
     seqDNAlist = list(sequence.upper())
     transformedDNA = transform(seqDNAlist)
-    """Find index of start codon"""
-    startIndex = findFirst(''.join(transformedDNA), startSeqDNA)
-    """Create open reading frame, ORF"""
-    stopIndex = findFirst(''.join(transformedDNA), stopSeqDNA)
+    """Find index of end tag"""
+    stopIndex = findFirst(''.join(transformedDNA), stopSeqDNA, True, 0)
+    """Find index of start tag and then generate open reading frame, ORF"""
     if type(stopIndex) == int:
-        orf = ''.join(transformedDNA)[startIndex:(stopIndex+len(stopSeqDNA)+3)]
-        lenORF = len(orf)
+        startIndex = findFirst(''.join(transformedDNA), startSeqDNA, False, stopIndex)
+        orf = ''.join(transformedDNA)[(startIndex+len(startSeqDNA)):(stopIndex+len(stopSeqDNA)+3)]
+        lenORF = len(orf)   
     else:
         orf = stopIndex
         lenORF = 'N/A'
@@ -171,11 +178,16 @@ dna2amino = {
 baseComplement = {
     'A':'T', 'C':'G', 'G':'C', 'T':'A', 'N':'N'
 }
-''' Unused
-startTagAA = 'M'
-stopTagAA = 'EQKLISEEDL'
-'''
+''' Define common variables in .env file rather than here'''
+START_TAG = os.environ.get("START_TAG")
+
 
 """Process"""
 if __name__ == "__main__":
     main()
+
+'''
+To-do:
+  - need error handling for if .seq doesnt contain START_TAG
+  - remove ORF base count in results. Can be calculated after if needed.
+'''
