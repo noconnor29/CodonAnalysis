@@ -8,6 +8,9 @@ load_dotenv()
 def main():
     global sourceLocation
     sourceLocation = (input('Enter path to .seq files: ').replace("'",""))
+    # TESTING ONLY
+    #sourceLocation = str(TEST_SOURCE_FILES)
+    print(str(sourceLocation))
     menu()
     global isCoding
     isCoding = getOrientation()
@@ -53,13 +56,13 @@ def getTag():
 
 def findFirst(sequence, target, forward=True, index=0):
     if forward == True:
-        position = sequence.find(target, index)
+        position = sequence.find(target, index) # returns index of lowest occurence of substring
         if (position != -1):
             return int(position)
         else:
             return "\'" + target + "\' not found in sequence."
     elif forward == False:
-        rposition = sequence.rfind(target, 0, index) #search from beginning to tag
+        rposition = sequence.rfind(target, 0, index) # returns index of highest occurence of substring
         if (rposition != -1):
             return int(rposition)
         else:
@@ -133,27 +136,34 @@ def processFiles(path):
             """write values to file"""
             with open(outfile, 'a') as f:
                 csv.writer(f).writerow(values)
-    print('\nResults: ' + sourceLocation + os.sep + outfile)
+    print('\nResults: ' + outfile)
 
 def analyze(sequence: str):
     seqDNA = sequence.upper()
-    seqDNAlist = list(sequence.upper())
-    transformedDNA = transform(seqDNAlist)
-    """Find index of end tag"""
+    #transformedDNA = transform(seqDNAlist)
+    transformedDNA = transform(list(seqDNA))
+    """Find index of start, end tag; generate ORF"""
     stopIndex = findFirst(''.join(transformedDNA), stopSeqDNA, True, 0)
-    """Find index of start tag and then generate open reading frame, ORF"""
     if type(stopIndex) == int:
+        """find where start tag begins"""
         startIndex = findFirst(''.join(transformedDNA), startSeqDNA, False, stopIndex)
-        orf = ''.join(transformedDNA)[(startIndex+len(startSeqDNA)):(stopIndex+len(stopSeqDNA)+3)]
-        lenORF = len(orf)   
+        if type(startIndex) == int:
+            """ORF starts immediately after start tag through stop codon"""
+            orf = ''.join(transformedDNA)[(startIndex+len(startSeqDNA)):(stopIndex+len(stopSeqDNA)+3)]
+            lenORF = len(orf)
+        else:
+            orf = 'Start sequence not found'
+            lenORF = 'N/A'
     else:
-        orf = stopIndex
+        startIndex = 'Stop sequence not found'
+        orf = 'Stop sequence not found'
         lenORF = 'N/A'
+
     """Create encoded amino acid sequence"""
     if 'not found' in orf:
-        aminos = 'Error: Tag codon not found in sequence.'
+        aminos = 'Tag not found in sequence.'
     else:
-        aminos = ''.join(translate(orf, startIndex))
+        aminos = ''.join(translate(orf))
     return [seqDNA, ''.join(transformedDNA), orf, lenORF, inFrame(orf), aminos]
 
 """Variables"""
@@ -180,7 +190,7 @@ baseComplement = {
 }
 ''' Define common variables in .env file rather than here'''
 START_TAG = os.environ.get("START_TAG")
-
+TEST_SOURCE_FILES = os.environ.get("TEST_SOURCE_FILES")
 
 """Process"""
 if __name__ == "__main__":
@@ -188,6 +198,5 @@ if __name__ == "__main__":
 
 '''
 To-do:
-  - need error handling for if .seq doesnt contain START_TAG
   - remove ORF base count in results. Can be calculated after if needed.
 '''
